@@ -1,0 +1,20 @@
+SELECT
+    P.MEMBER_NAME
+    ,R.REVIEW_TEXT
+    ,TO_CHAR(R.REVIEW_DATE,'YYYY-MM-DD') AS REVIEW_DATE
+  FROM MEMBER_PROFILE P
+  JOIN REST_REVIEW R
+    ON R.MEMBER_ID IN (
+        SELECT
+            MEMBER_ID
+          FROM (
+            SELECT
+                MEMBER_ID
+                , DENSE_RANK() OVER(ORDER BY COUNT(*) DESC) AS RANK
+              FROM REST_REVIEW
+          GROUP BY MEMBER_ID
+          )
+        WHERE RANK = 1
+    )
+    AND R.MEMBER_ID = P.MEMBER_ID
+ORDER BY R.REVIEW_DATE, R.REVIEW_TEXT
